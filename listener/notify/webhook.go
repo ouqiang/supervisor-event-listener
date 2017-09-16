@@ -1,26 +1,26 @@
 package notify
 
 import (
-    "github.com/ouqiang/supervisor-event-listener/event"
-    "encoding/json"
-    "github.com/ouqiang/supervisor-event-listener/utils/httpclient"
-    "errors"
-    "fmt"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/ouqiang/supervisor-event-listener/event"
+	"github.com/ouqiang/supervisor-event-listener/utils/httpclient"
 )
 
-type WebHook struct {}
+type WebHook struct{}
 
-func (hook *WebHook) Send(message event.Message) error  {
-    encodeMessage, err := json.Marshal(message)
-    if err != nil {
-        return err
-    }
-    timeout := 60
-    response := httpclient.PostJson(Conf.WebHook.Url, string(encodeMessage), timeout)
+func (hook *WebHook) Send(message event.Message) error {
+	encodeMessage, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+	timeout := 60
+	response := httpclient.PostJson(Conf.WebHook.Url, string(encodeMessage), timeout)
 
-    if response.StatusCode == 200 {
-        return nil
-    }
-    errorMessage := fmt.Sprintf("webhook执行失败#HTTP状态码-%d#HTTP-BODY-%s", response.StatusCode, response.Body)
-    return errors.New(errorMessage)
+	if response.StatusCode == 200 {
+		return nil
+	}
+	errorMessage := fmt.Sprintf("webhook执行失败#HTTP状态码-%d#HTTP-BODY-%s", response.StatusCode, response.Body)
+	return errors.New(errorMessage)
 }

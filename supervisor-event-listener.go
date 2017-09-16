@@ -1,11 +1,11 @@
 package main
 
 import (
-    "github.com/ouqiang/supervisor-event-listener/listener"
+	"github.com/ouqiang/supervisor-event-listener/listener"
 )
 
-func main()  {
-    for {
-        listener.Start()
-    }
+func main() {
+	for {
+		listener.Start()
+	}
 }
