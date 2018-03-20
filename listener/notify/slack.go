@@ -3,7 +3,7 @@ package notify
 import (
 	"errors"
 	"fmt"
-	"github.com/ouqiang/gocron/modules/httpclient"
+	"github.com/ouqiang/supervisor-event-listener/utils/httpclient"
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/utils"
 )
