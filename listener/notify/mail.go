@@ -18,13 +18,28 @@ func (mail *Mail) Send(message event.Message) error {
 	gomailMessage.SetHeader("To", Conf.MailUser.Email...)
 	gomailMessage.SetHeader("Subject", "Supervisor事件通知")
 	gomailMessage.SetBody("text/html", body)
-	mailer := gomail.NewPlainDialer(
-		Conf.MailServer.Host,
-		Conf.MailServer.Port,
-		Conf.MailServer.User,
-		Conf.MailServer.Password,
-	)
-	err := mailer.DialAndSend(gomailMessage)
+
+	var dialer *gomail.Dialer
+
+	// 465 port should use SSL
+	if Conf.MailServer.Port == 465 {
+		dialer = &gomail.Dialer{
+			Host:Conf.MailServer.Host,
+			Port:Conf.MailServer.Port,
+			Username:Conf.MailServer.User,
+			Password:Conf.MailServer.Password,
+			SSL: true,
+		}
+	} else {
+		dialer = gomail.NewPlainDialer(
+			Conf.MailServer.Host,
+			Conf.MailServer.Port,
+			Conf.MailServer.User,
+			Conf.MailServer.Password,
+		)
+	}
+
+	err := dialer.DialAndSend(gomailMessage)
 	if err == nil {
 		return nil
 	}
