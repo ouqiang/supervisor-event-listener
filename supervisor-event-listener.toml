@@ -1,0 +1,30 @@
+[default]
+# 通知类型 mail,slack,webhook 只能选择一种
+notify_type = "mail"
+
+# 邮件服务器配置
+[mail]
+user = "hello@163.com"
+users = ["world@163.com", "world2@163.com"]
+[mail.server]
+user = "test@163.com"
+password = "123456"
+host = "smtp.163.com"
+port = 25
+
+
+# Slack配置
+[slack]
+webhook_url = "https://hooks.slack.com/services/xxxx/xxx/xxxx"
+channel = "exception"
+
+# Custom WebHook 
+[webhook]
+url = "http://my.webhook.com"
+
+
+# BearyChat
+[bearychat]
+webhook_url = "https://hook.bearychat.com/=xxx/xxxxx/xxxx"
+channel = "alert"
+timeout = 8

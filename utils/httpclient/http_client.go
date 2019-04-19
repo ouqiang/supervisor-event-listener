@@ -16,6 +16,14 @@ type ResponseWrapper struct {
 	Header     http.Header
 }
 
+func (this *ResponseWrapper) IsOK() bool {
+	return this.StatusCode == 200
+}
+
+func (this *ResponseWrapper) Error() error {
+	return fmt.Errorf(this.Body)
+}
+
 func Get(url string, timeout int) ResponseWrapper {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

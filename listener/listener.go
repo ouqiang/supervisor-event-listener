@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/listener/notify"
+	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
 	"log"
 	"os"
 )
@@ -29,19 +30,19 @@ func listen() {
 	for {
 		ready()
 		header, err := readHeader(reader)
+		tmpfslog.Info("header:%+v err:%+v", header, err)
 		if err != nil {
 			failure(err)
 			continue
 		}
 		payload, err := readPayload(reader, header.Len)
+		tmpfslog.Info("payloadL%+v err:%+v", payload, err)
 		if err != nil {
 			failure(err)
 			continue
 		}
 		// 只处理进程异常退出事件
-		if header.EventName == "PROCESS_STATE_EXITED" {
-			notify.Push(header, payload)
-		}
+		notify.Push(header, payload)
 		success()
 	}
 }

@@ -3,6 +3,7 @@ package notify
 import (
 	"github.com/ouqiang/supervisor-event-listener/config"
 	"github.com/ouqiang/supervisor-event-listener/event"
+	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
 
 	"fmt"
 	"os"
@@ -16,6 +17,8 @@ var (
 
 func init() {
 	Conf = config.ParseConfig()
+
+	tmpfslog.Info("loading config: %+v\n", Conf)
 	queue = make(chan event.Message, 10)
 	go start()
 }
@@ -33,6 +36,7 @@ func start() {
 	var notifyHandler Notifiable
 	for {
 		message = <-queue
+		tmpfslog.Info("%+v\n", message)
 		switch Conf.NotifyType {
 		case "mail":
 			notifyHandler = &Mail{}
@@ -40,6 +44,8 @@ func start() {
 			notifyHandler = &Slack{}
 		case "webhook":
 			notifyHandler = &WebHook{}
+		case "bearychat":
+			notifyHandler = &BearyChat{}
 		}
 		if notifyHandler == nil {
 			continue

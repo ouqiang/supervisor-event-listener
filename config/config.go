@@ -3,10 +3,12 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/ouqiang/supervisor-event-listener/utils"
-	"gopkg.in/ini.v1"
 	"os"
 	"strings"
+
+	"github.com/ouqiang/supervisor-event-listener/utils"
+	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
+	"gopkg.in/ini.v1"
 )
 
 type Config struct {
@@ -15,6 +17,7 @@ type Config struct {
 	MailServer MailServer
 	MailUser   MailUser
 	Slack      Slack
+	BearyChat  BearyChat
 }
 
 type WebHook struct {
@@ -24,6 +27,12 @@ type WebHook struct {
 type Slack struct {
 	WebHookUrl string
 	Channel    string
+}
+
+type BearyChat struct {
+	WebHookUrl string
+	Channel    string
+	Timeout    int
 }
 
 // 邮件服务器
@@ -54,12 +63,14 @@ func ParseConfig() *Config {
 	section := file.Section("default")
 	notifyType := section.Key("notify_type").String()
 	notifyType = strings.TrimSpace(notifyType)
-	if !utils.InStringSlice([]string{"mail", "slack", "webhook"}, notifyType) {
+	if !utils.InStringSlice([]string{"mail", "slack", "webhook", "bearychat"}, notifyType) {
 		Exit("不支持的通知类型-" + notifyType)
 	}
 
 	config := &Config{}
 	config.NotifyType = notifyType
+
+	tmpfslog.Info("notifyType: %+v\n", config.NotifyType)
 	switch notifyType {
 	case "mail":
 		config.MailServer = parseMailServer(section)
@@ -68,8 +79,9 @@ func ParseConfig() *Config {
 		config.Slack = parseSlack(section)
 	case "webhook":
 		config.WebHook = parseWebHook(section)
+	case "bearychat":
+		config.BearyChat = parseBearyChat(section)
 	}
-
 	return config
 }
 
@@ -132,6 +144,23 @@ func parseWebHook(section *ini.Section) WebHook {
 	webHook.Url = url
 
 	return webHook
+}
+
+func parseBearyChat(section *ini.Section) BearyChat {
+	url := section.Key("bearychat.webhook_url").String()
+	if url == "" {
+		Exit("WebHookUrl配置错误")
+	}
+	timeout, err := section.Key("bearychat.timeout").Int()
+	channel := section.Key("bearychat.channel").String()
+	if err != nil {
+		Exit(err.Error())
+	}
+	return BearyChat{
+		WebHookUrl: strings.TrimSpace(url),
+		Channel:    strings.TrimSpace(channel),
+		Timeout:    timeout,
+	}
 }
 
 func Exit(msg string) {
