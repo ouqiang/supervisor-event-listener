@@ -16,7 +16,7 @@ func (this *BearyChat) Send(msg event.Message) error {
 	timeout := Conf.BearyChat.Timeout
 
 	params := map[string]interface{}{
-		"text": msg.String(),
+		"text": this.format(msg),
 	}
 	if channel != "" {
 		params["channel"] = channel
@@ -26,17 +26,15 @@ func (this *BearyChat) Send(msg event.Message) error {
 	if err != nil {
 		return err
 	}
-	tmpfslog.Info("url: %s", url)
-	tmpfslog.Info("timeout: %d", timeout)
-	tmpfslog.Info("params: %v", params)
-
 	resp := httpclient.PostJson(url, string(body), timeout)
 	if !resp.IsOK() {
+		tmpfslog.Error("params: %v err: %v", params, resp.Error())
 		return resp.Error()
 	}
 	return nil
 }
 
 func (this *BearyChat) format(msg event.Message) string {
-	return ""
+	// return msg.ToJson(4)
+	return msg.String()
 }

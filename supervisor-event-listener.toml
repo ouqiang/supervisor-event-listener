@@ -20,7 +20,7 @@ channel = "exception"
 
 # Custom WebHook 
 [webhook]
-url = "http://my.webhook.com"
+url = "https://my.webhook.com"
 
 
 # BearyChat

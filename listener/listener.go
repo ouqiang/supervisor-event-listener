@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/listener/notify"
 	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
-	"log"
-	"os"
 )
 
 var (
@@ -16,12 +17,14 @@ var (
 )
 
 func Start() {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Print("panic", err)
-		}
-	}()
-	listen()
+	for {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Print("panic", err)
+			}
+		}()
+		listen()
+	}
 }
 
 // 监听事件, 从标准输入获取事件内容
@@ -30,13 +33,13 @@ func listen() {
 	for {
 		ready()
 		header, err := readHeader(reader)
-		tmpfslog.Info("header:%+v err:%+v", header, err)
+		tmpfslog.Debug("header:%+v err:%+v", header, err)
 		if err != nil {
 			failure(err)
 			continue
 		}
 		payload, err := readPayload(reader, header.Len)
-		tmpfslog.Info("payloadL%+v err:%+v", payload, err)
+		tmpfslog.Debug("payloadL%+v err:%+v", payload, err)
 		if err != nil {
 			failure(err)
 			continue

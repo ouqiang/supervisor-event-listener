@@ -1,5 +1,5 @@
 # Binaries for programs and plugins
-./supervisor-event-listener
+supervisor-event-listener
 *.exe
 *.dll
 *.so
@@ -16,3 +16,4 @@
 .idear
 vendor/**/*.yml
 vendor/**/.gitignore
+build/

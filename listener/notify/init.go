@@ -15,12 +15,11 @@ var (
 	queue chan event.Message
 )
 
-func init() {
-	Conf = config.ParseConfig()
-
-	tmpfslog.Info("loading config: %+v\n", Conf)
+func Init(fpath string) error {
+	tmpfslog.Info("loading config: %s", fpath)
+	Conf = config.ParseConfig(fpath)
 	queue = make(chan event.Message, 10)
-	go start()
+	return nil
 }
 
 type Notifiable interface {
@@ -28,7 +27,11 @@ type Notifiable interface {
 }
 
 func Push(header *event.Header, payload *event.Payload) {
-	queue <- event.Message{header, payload}
+	queue <- event.NewMessage(header, payload)
+}
+
+func Start() {
+	go start()
 }
 
 func start() {
@@ -36,7 +39,7 @@ func start() {
 	var notifyHandler Notifiable
 	for {
 		message = <-queue
-		tmpfslog.Info("%+v\n", message)
+		tmpfslog.Debug("message: %+v\n", message)
 		switch Conf.NotifyType {
 		case "mail":
 			notifyHandler = &Mail{}

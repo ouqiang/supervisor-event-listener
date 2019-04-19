@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -48,10 +47,7 @@ type MailUser struct {
 	Email []string
 }
 
-func ParseConfig() *Config {
-	var configFile string
-	flag.StringVar(&configFile, "c", "/etc/supervisor-event-listener.ini", "config file")
-	flag.Parse()
+func ParseConfig(configFile string) *Config {
 	configFile = strings.TrimSpace(configFile)
 	if configFile == "" {
 		Exit("请指定配置文件路径")

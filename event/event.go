@@ -1,23 +1,68 @@
 package event
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ouqiang/supervisor-event-listener/utils"
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/ouqiang/supervisor-event-listener/utils"
 )
 
 // Message 消息格式
 type Message struct {
+	TS      time.Time
 	Header  *Header
 	Payload *Payload
 }
 
-func (msg *Message) String() string {
-	return fmt.Sprintf("Host: %s\nProcess: %s\nPID: %d\nEXITED FROM state: %s", msg.Payload.Ip, msg.Payload.ProcessName, msg.Payload.Pid, msg.Payload.FromState)
+func NewMessage(h *Header, p *Payload) Message {
+	return Message{
+		TS:      time.Now(),
+		Header:  h,
+		Payload: p,
+	}
+}
 
+func (msg *Message) String() string {
+	tmpl := `Host: %s
+Process: %s
+PID: %d
+EXITED FROM state: %s
+Date: %s`
+	return fmt.Sprintf(tmpl,
+		msg.Payload.Ip,
+		msg.Payload.ProcessName,
+		msg.Payload.Pid,
+		msg.Payload.FromState,
+		msg.TS.Format(time.RFC3339),
+	)
+}
+
+func (msg *Message) ToJson(indent ...int) string {
+	realIndent := 0
+	if len(indent) > 0 {
+		realIndent = indent[0]
+	}
+	t := ""
+	switch realIndent {
+	case 0:
+	case 1:
+		t = " "
+	case 2:
+		t = "  "
+	case 3:
+		t = "   "
+	case 4:
+		t = "    "
+	default:
+		t = "    "
+	}
+	_bytes, _ := json.MarshalIndent(msg, "", t)
+	return string(_bytes)
 }
 
 // Header Supervisord触发事件时会先发送Header，根据Header中len字段去读取Payload
