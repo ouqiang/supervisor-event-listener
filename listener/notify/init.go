@@ -5,7 +5,7 @@ import (
 
 	"github.com/ouqiang/supervisor-event-listener/config"
 	"github.com/ouqiang/supervisor-event-listener/event"
-	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
+	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
 
 	"fmt"
 	"os"
@@ -18,10 +18,11 @@ var (
 	Conf         *config.Config
 	chanMsg      chan event.Message
 	chanSig      chan os.Signal = make(chan os.Signal, 100)
+	listerners   map[string]Notifiable
 )
 
 func Init(fpath string) error {
-	tmpfslog.Info("loading config: %s", fpath)
+	errlog.Info("loading config: %s", fpath)
 	if Conf != nil {
 		return fmt.Errorf("init twice!!!")
 	}
@@ -34,17 +35,12 @@ func Init(fpath string) error {
 
 func Reload() error {
 	fpath := confFilePath
-	tmpfslog.Info("loading config: %s", fpath)
+	errlog.Info("loading config: %s", fpath)
 	Conf = config.ParseConfig(fpath)
 	return nil
 }
-
-type Notifiable interface {
-	Send(event.Message) error
-}
-
-func Push(header *event.Header, payload *event.Payload) {
-	chanMsg <- event.NewMessage(header, payload)
+func Push(msg event.Message) {
+	chanMsg <- msg
 }
 
 func Start() {
@@ -52,11 +48,17 @@ func Start() {
 }
 
 func start() {
-	select {
-	case msg := <-chanMsg:
-		handleMessage(msg)
-	case sig := <-chanSig:
-		handleSignal(sig)
+	for {
+		select {
+		case msg := <-chanMsg:
+			errlog.Debug("msg=%s", msg.ToJson(2))
+			handleMessage(msg)
+			time.Sleep(100 * time.Millisecond)
+		case sig := <-chanSig:
+			handleSignal(sig)
+		default:
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
 }
 
@@ -68,7 +70,7 @@ func handleSignal(sig os.Signal) error {
 }
 
 func handleMessage(msg event.Message) error {
-	tmpfslog.Debug("message: %+v\n", msg)
+	errlog.Debug("message: %+v\n", msg)
 	var notifyHandler Notifiable
 	switch Conf.NotifyType {
 	case "mail":

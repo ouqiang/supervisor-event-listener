@@ -1,8 +1,10 @@
-package tmpfslog
+package errlog
 
 import (
 	"fmt"
 	"os"
+	"path"
+	"runtime"
 	"time"
 )
 
@@ -26,12 +28,12 @@ var LEVELS_NAME = map[int]string{
 	ALL:   "all",
 }
 
-var f *os.File
+var f = os.Stderr
 var curLogLevel = INFO
 
 func init() {
-	fpath := "/tmp/supervisor-event-listener.log"
-	f = newLogFile(fpath)
+	// fpath := "/tmp/supervisor-event-listener.log"
+	// f = newLogFile(fpath)
 }
 
 func newLogFile(fpath string) *os.File {
@@ -47,9 +49,13 @@ func log(level int, _fmt string, args ...interface{}) {
 	if level > curLogLevel {
 		return
 	}
+
+	_, fn, lineno, _ := runtime.Caller(2)
+	fn = path.Base(fn)
 	now := time.Now()
 	levelName := LEVELS_NAME[level]
-	prefix := fmt.Sprintf("%s [%s]: ", now.Format(time.RFC3339), levelName)
+	prefix := fmt.Sprintf("%s [%s] %12s:%d ",
+		now.Format(time.RFC3339), levelName, fn, lineno)
 	f.WriteString(prefix)
 	f.WriteString(fmt.Sprintf(_fmt, args...))
 	f.WriteString("\n")

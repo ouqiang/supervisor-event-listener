@@ -7,7 +7,7 @@ import (
 
 	"github.com/ouqiang/supervisor-event-listener/listener"
 	"github.com/ouqiang/supervisor-event-listener/listener/notify"
-	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
+	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 	err := notify.Init(configFile)
 	if err != nil {
-		tmpfslog.Error("notify init failed. err: %+v", err)
+		errlog.Error("notify init failed. err: %+v", err)
 		os.Exit(127)
 	}
 	if dryRun {

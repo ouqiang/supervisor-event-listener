@@ -8,13 +8,13 @@ install:
 
 
 test-integration:
-	sudo supervisorctl stop supervisor-event-listener
 	go build 
+	sudo supervisorctl stop supervisor-event-listener
 	sudo cp ./supervisor-event-listener /usr/local/bin/
 	sudo cp ./tests/supervisor-app.ini /etc/supervisor.d/
-	sudo supervisorctl start  supervisor-event-listener
-	sudo supervisorctl update
-	sudo supervisorctl start sleep-then-exit
+	sudo supervisorctl remove supervisor-event-listener
+	sudo supervisorctl update supervisor-event-listener
+	sudo supervisorctl tail -f supervisor-event-listener stderr
 
 
 clean:

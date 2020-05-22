@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/ouqiang/supervisor-event-listener/event"
+	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
 	"github.com/ouqiang/supervisor-event-listener/utils/httpclient"
-	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
 )
 
 type BearyChat struct{}
@@ -28,7 +28,7 @@ func (this *BearyChat) Send(msg event.Message) error {
 	}
 	resp := httpclient.PostJson(url, string(body), timeout)
 	if !resp.IsOK() {
-		tmpfslog.Error("params: %v err: %v", params, resp.Error())
+		errlog.Error("params: %v err: %v", params, resp.Error())
 		return resp.Error()
 	}
 	return nil

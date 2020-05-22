@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/ouqiang/supervisor-event-listener/utils"
-	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
+	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
 	"gopkg.in/ini.v1"
 )
 
@@ -66,7 +66,7 @@ func ParseConfig(configFile string) *Config {
 	config := &Config{}
 	config.NotifyType = notifyType
 
-	tmpfslog.Info("notifyType: %+v\n", config.NotifyType)
+	errlog.Info("notifyType: %+v\n", config.NotifyType)
 	switch notifyType {
 	case "mail":
 		config.MailServer = parseMailServer(section)
