@@ -75,16 +75,14 @@ func readPayload(reader *bufio.Reader, payloadLen int) (*Payload, error) {
 }
 
 func (msg *Message) String() string {
-	tmpl := `Proc:  %s
-Host:  %s
-State: %s
-PID:   %d
-Date:  %s`
+	tmpl := `Proc: %s
+Host: %s
+PID:  %d    State: %s
+Date: %s`
 	return fmt.Sprintf(tmpl,
 		msg.Payload.ProcessName,
 		msg.Payload.IP,
-		msg.Payload.FromState,
-		msg.Payload.PID,
+		msg.Payload.PID, msg.Payload.FromState,
 		msg.TS.Format(time.RFC3339),
 	)
 }
