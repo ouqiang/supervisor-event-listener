@@ -28,16 +28,16 @@ func NewMessage(h *Header, p *Payload) Message {
 }
 
 func (msg *Message) String() string {
-	tmpl := `Host: %s
-Process: %s
-PID: %d
-EXITED FROM state: %s
-Date: %s`
+	tmpl := `Process: %s
+Host:    %s
+State:   %s
+PID:     %d
+Date:    %s`
 	return fmt.Sprintf(tmpl,
-		msg.Payload.Ip,
 		msg.Payload.ProcessName,
-		msg.Payload.Pid,
+		msg.Payload.IP,
 		msg.Payload.FromState,
+		msg.Payload.PID,
 		msg.TS.Format(time.RFC3339),
 	)
 }
@@ -78,20 +78,20 @@ type Header struct {
 
 // Payload
 type Payload struct {
-	Ip          string
+	IP          string
 	ProcessName string // 进程名称
 	GroupName   string // 进程组名称
 	FromState   string
 	Expected    int
-	Pid         int
+	PID         int
 }
 
 // Fields
 type Fields map[string]string
 
 var (
-	ErrParseHeader  = errors.New("解析Header失败")
-	ErrParsePayload = errors.New("解析Payload失败")
+	ErrParseHeader  = errors.New("parse header failed")
+	ErrParsePayload = errors.New("parse payload failed")
 )
 
 func ParseHeader(header string) (*Header, error) {
@@ -119,12 +119,12 @@ func ParsePayload(payload string) (*Payload, error) {
 		return p, ErrParsePayload
 	}
 	hostname, _ := os.Hostname()
-	p.Ip = fmt.Sprintf("%s(%s)", utils.GetLocalIp(), hostname)
+	p.IP = fmt.Sprintf("%s(%s)", utils.GetLocalIp(), hostname)
 	p.ProcessName = fields["processname"]
 	p.GroupName = fields["groupname"]
 	p.FromState = fields["from_state"]
 	p.Expected, _ = strconv.Atoi(fields["expected"])
-	p.Pid, _ = strconv.Atoi(fields["pid"])
+	p.PID, _ = strconv.Atoi(fields["pid"])
 
 	return p, nil
 }

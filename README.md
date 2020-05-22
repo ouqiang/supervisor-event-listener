@@ -50,10 +50,10 @@ webhook_url = http://my.webhook.com
 ## 通知内容
 邮件、Slack
 ```shell
-Host: ip(hostname)
 Process: process-name
-PID: 6152
-EXITED FROM state: RUNNING
+Host:    ip(hostname)
+EXITED   FROM state: RUNNING
+PID:     6152
 ```
 WebHook, Post请求, 字段含义查看Supervisor文档
 ```json

@@ -1,7 +1,7 @@
 LDFLAGS:=-w
 BUILD_DIR:=./build/
 PROJECT_NAME:=supervisor-event-listener
-VERSION:=1.1.0
+VERSION:=1.1.1
 
 install:
 	cp ./supervisor-event-listener /usr/local/bin/

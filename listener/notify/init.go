@@ -1,24 +1,41 @@
 package notify
 
 import (
+	"syscall"
+
 	"github.com/ouqiang/supervisor-event-listener/config"
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/utils/tmpfslog"
 
 	"fmt"
 	"os"
+	"os/signal"
 	"time"
 )
 
 var (
-	Conf  *config.Config
-	queue chan event.Message
+	confFilePath string
+	Conf         *config.Config
+	chanMsg      chan event.Message
+	chanSig      chan os.Signal = make(chan os.Signal, 100)
 )
 
 func Init(fpath string) error {
 	tmpfslog.Info("loading config: %s", fpath)
+	if Conf != nil {
+		return fmt.Errorf("init twice!!!")
+	}
 	Conf = config.ParseConfig(fpath)
-	queue = make(chan event.Message, 10)
+	chanMsg = make(chan event.Message, 10)
+	confFilePath = fpath
+	signal.Notify(chanSig, syscall.SIGHUP)
+	return nil
+}
+
+func Reload() error {
+	fpath := confFilePath
+	tmpfslog.Info("loading config: %s", fpath)
+	Conf = config.ParseConfig(fpath)
 	return nil
 }
 
@@ -27,7 +44,7 @@ type Notifiable interface {
 }
 
 func Push(header *event.Header, payload *event.Payload) {
-	queue <- event.NewMessage(header, payload)
+	chanMsg <- event.NewMessage(header, payload)
 }
 
 func Start() {
@@ -35,27 +52,39 @@ func Start() {
 }
 
 func start() {
-	var message event.Message
-	var notifyHandler Notifiable
-	for {
-		message = <-queue
-		tmpfslog.Debug("message: %+v\n", message)
-		switch Conf.NotifyType {
-		case "mail":
-			notifyHandler = &Mail{}
-		case "slack":
-			notifyHandler = &Slack{}
-		case "webhook":
-			notifyHandler = &WebHook{}
-		case "bearychat":
-			notifyHandler = &BearyChat{}
-		}
-		if notifyHandler == nil {
-			continue
-		}
-		go send(notifyHandler, message)
-		time.Sleep(1 * time.Second)
+	select {
+	case msg := <-chanMsg:
+		handleMessage(msg)
+	case sig := <-chanSig:
+		handleSignal(sig)
 	}
+}
+
+func handleSignal(sig os.Signal) error {
+	if sig != syscall.SIGHUP {
+		return fmt.Errorf("invalid signal %v", sig)
+	}
+	return Reload()
+}
+
+func handleMessage(msg event.Message) error {
+	tmpfslog.Debug("message: %+v\n", msg)
+	var notifyHandler Notifiable
+	switch Conf.NotifyType {
+	case "mail":
+		notifyHandler = &Mail{}
+	case "slack":
+		notifyHandler = &Slack{}
+	case "webhook":
+		notifyHandler = &WebHook{}
+	case "bearychat":
+		notifyHandler = &BearyChat{}
+	}
+	if notifyHandler == nil {
+		return fmt.Errorf("invalid notify type %s", Conf.NotifyType)
+	}
+	go send(notifyHandler, msg)
+	return nil
 }
 
 func send(notifyHandler Notifiable, message event.Message) {
