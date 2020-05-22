@@ -51,13 +51,13 @@ func start() {
 	for {
 		select {
 		case msg := <-chanMsg:
-			errlog.Debug("msg=%s", msg.ToJson(2))
+			errlog.Info("msg=%s", msg.ToJson(2))
 			handleMessage(msg)
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 		case sig := <-chanSig:
 			handleSignal(sig)
 		default:
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
