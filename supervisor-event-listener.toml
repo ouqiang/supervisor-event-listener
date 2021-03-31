@@ -9,10 +9,12 @@ server_port = 25
 [slack]
 url = "https://hooks.slack.com/services/xxxx/xxx/xxxx"
 channel = "exception"
+timeout = 6
 
 
 [webhook]
 url = "http://my.webhook.com"
+timeout = 6
 
 
 [bearychat]

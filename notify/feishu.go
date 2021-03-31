@@ -17,7 +17,7 @@ type Feishu conf.Feishu
 
 func (this *Feishu) Send(msg *event.Message) error {
 	url := this.URL
-	timeout := 6
+	timeout := this.Timeout
 	calcSign := func(secret string, timestamp int64) string {
 		//timestamp + key 做sha256, 再进行base64 encode
 		stringToSign := fmt.Sprintf("%v\n%s", timestamp, secret)
