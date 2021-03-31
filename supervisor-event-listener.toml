@@ -1,0 +1,26 @@
+[mail]
+receivers = ["hello@163.com", "world@163.com"]
+server_user = "test@163.com"
+server_password = "123456"
+server_host = "smtp.163.com"
+server_port = 25
+
+
+[slack]
+url = "https://hooks.slack.com/services/xxxx/xxx/xxxx"
+channel = "exception"
+
+
+[webhook]
+url = "http://my.webhook.com"
+
+
+[bearychat]
+url = "https://hook.bearychat.com/xxx/xxxx"
+channel = "alert"
+timeout = 6
+
+
+[feishu]
+url = "https://hook.feishu.com/xxx/xxxx"
+timeout = 6

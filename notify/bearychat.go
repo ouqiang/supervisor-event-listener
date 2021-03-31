@@ -3,17 +3,18 @@ package notify
 import (
 	"encoding/json"
 
+	"github.com/ouqiang/supervisor-event-listener/conf"
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
 	"github.com/ouqiang/supervisor-event-listener/utils/httpclient"
 )
 
-type BearyChat struct{}
+type BearyChat conf.BearyChat
 
-func (this *BearyChat) Send(msg event.Message) error {
-	url := Conf.BearyChat.WebHookUrl
-	channel := Conf.BearyChat.Channel
-	timeout := Conf.BearyChat.Timeout
+func (this *BearyChat) Send(msg *event.Message) error {
+	url := this.URL
+	channel := this.Channel
+	timeout := this.Timeout
 
 	params := map[string]interface{}{
 		"text": this.format(msg),
@@ -29,12 +30,12 @@ func (this *BearyChat) Send(msg event.Message) error {
 	resp := httpclient.PostJson(url, string(body), timeout)
 	if !resp.IsOK() {
 		errlog.Error("params: %v err: %v", params, resp.Error())
-		return resp.Error()
+		return resp
 	}
 	return nil
 }
 
-func (this *BearyChat) format(msg event.Message) string {
+func (this *BearyChat) format(msg *event.Message) string {
 	// return msg.ToJson(4)
 	return msg.String()
 }

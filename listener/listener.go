@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ouqiang/supervisor-event-listener/event"
-	"github.com/ouqiang/supervisor-event-listener/listener/notify"
+	"github.com/ouqiang/supervisor-event-listener/notify"
 )
 
 var (
@@ -23,6 +24,7 @@ func Start() {
 			}
 		}()
 		listen()
+		time.Sleep(time.Second)
 	}
 }
 
@@ -37,7 +39,7 @@ func listen() {
 			continue
 		}
 		success()
-		notify.Push(msg)
+		notify.Push(&msg)
 	}
 }
 

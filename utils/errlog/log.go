@@ -45,7 +45,7 @@ func newLogFile(fpath string) *os.File {
 	return file
 }
 
-func log(level int, _fmt string, args ...interface{}) {
+func logFormat(level int, _fmt string, args ...interface{}) {
 	if level > curLogLevel {
 		return
 	}
@@ -62,19 +62,19 @@ func log(level int, _fmt string, args ...interface{}) {
 }
 
 func Debug(fmt string, args ...interface{}) {
-	log(DEBUG, fmt, args...)
+	logFormat(DEBUG, fmt, args...)
 }
 
 func Info(fmt string, args ...interface{}) {
-	log(INFO, fmt, args...)
+	logFormat(INFO, fmt, args...)
 }
 
 func Error(fmt string, args ...interface{}) {
-	log(ERROR, fmt, args...)
+	logFormat(ERROR, fmt, args...)
 }
 
 func Fatal(fmt string, args ...interface{}) {
-	log(FATAL, fmt, args...)
+	logFormat(FATAL, fmt, args...)
 	f.Close()
 	os.Exit(127)
 }
