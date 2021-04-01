@@ -1,23 +1,20 @@
 package notify
 
 import (
+	"fmt"
+	"os"
+	"strings"
 	"sync/atomic"
-	"syscall"
+	"time"
 
 	"github.com/ouqiang/supervisor-event-listener/conf"
 	"github.com/ouqiang/supervisor-event-listener/event"
 	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
-
-	"fmt"
-	"os"
-	"os/signal"
-	"time"
 )
 
 var (
-	confFilePath string
-	chanMsg      = make(chan *event.Message, 2048)
-	chanSig      = make(chan os.Signal, 128)
+	chanMsg    = make(chan *event.Message, 2048)
+	chanReload = make(chan *conf.Config, 16)
 	// notifiables  map[string]Notifiable
 	notifiables atomic.Value
 )
@@ -26,7 +23,6 @@ func Init(conf *conf.Config) error {
 	if conf == nil {
 		return fmt.Errorf("nil config")
 	}
-	signal.Notify(chanSig, syscall.SIGHUP)
 
 	m := map[string]Notifiable{}
 	if conf.WebHook != nil {
@@ -48,11 +44,23 @@ func Init(conf *conf.Config) error {
 	return nil
 }
 
-func Reload() error {
-	fpath := confFilePath
-	errlog.Info("loading config: %s", fpath)
+func Reload(conf *conf.Config) {
+	chanReload <- conf
+}
+
+func reload(conf *conf.Config) error {
+	if err := Init(conf); err != nil {
+		errlog.Info("loading config failed. %v", err)
+		return err
+	}
+	names := []string{}
+	for name := range Get() {
+		names = append(names, name)
+	}
+	errlog.Info("reloaded config: %s", strings.Join(names, " "))
 	return nil
 }
+
 func Push(msg *event.Message) {
 	chanMsg <- msg
 }
@@ -68,19 +76,12 @@ func run() {
 			errlog.Info("msg=%s", msg.ToJson(2))
 			handleMessage(msg)
 			time.Sleep(50 * time.Millisecond)
-		case sig := <-chanSig:
-			handleSignal(sig)
+		case conf := <-chanReload:
+			_ = reload(conf)
 		default:
 			time.Sleep(50 * time.Millisecond)
 		}
 	}
-}
-
-func handleSignal(sig os.Signal) error {
-	if sig != syscall.SIGHUP {
-		return fmt.Errorf("invalid signal %v", sig)
-	}
-	return Reload()
 }
 
 func handleMessage(msg *event.Message) error {

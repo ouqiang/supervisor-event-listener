@@ -4,11 +4,17 @@ import (
 	"flag"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ouqiang/supervisor-event-listener/conf"
 	"github.com/ouqiang/supervisor-event-listener/listener"
 	"github.com/ouqiang/supervisor-event-listener/notify"
 	"github.com/ouqiang/supervisor-event-listener/utils/errlog"
+)
+
+var (
+	chanSig = make(chan os.Signal, 128)
 )
 
 func main() {
@@ -38,4 +44,18 @@ func main() {
 	}
 	notify.Start()
 	listener.Start()
+
+	signal.Notify(chanSig, syscall.SIGHUP)
+	for sig := range chanSig {
+		switch sig {
+		case syscall.SIGHUP:
+			if err := conf.Reload(*configFile); err != nil {
+				errlog.Error("config init failed. err: %v", err)
+				continue
+			}
+			notify.Reload(conf.Get())
+		default:
+			errlog.Info("unexpected signal %v", sig)
+		}
+	}
 }

@@ -1,5 +1,5 @@
 project_name:=supervisor-event-listener
-project_version:=1.2.0
+project_version:=1.2.1
 root_dir := $(abspath $(CURDIR))
 build_dir := $(root_dir)/build
 GOPATH := ${HOME}/go
@@ -7,7 +7,7 @@ GOPATH := ${HOME}/go
 
 .PHONY: clean
 clean:
-	rm -fr $(buld_dir)
+	rm -fr $(build_dir)
 
 .PHONY: build-bydocker
 build-bydocker:

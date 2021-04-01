@@ -13,10 +13,16 @@ import (
 )
 
 var (
+	// ErrPayloadLength ...
 	ErrPayloadLength = errors.New("Header中len长度与实际读取长度不一致")
 )
 
+// Start ...
 func Start() {
+	go run()
+}
+
+func run() {
 	for {
 		defer func() {
 			if err := recover(); err != nil {
