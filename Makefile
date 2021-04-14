@@ -1,5 +1,5 @@
 project_name:=supervisor-event-listener
-project_version:=1.2.1
+project_version:=1.2.2
 root_dir := $(abspath $(CURDIR))
 build_dir := $(root_dir)/build
 GOPATH := ${HOME}/go
