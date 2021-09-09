@@ -4,6 +4,8 @@ root_dir := $(abspath $(CURDIR))
 build_dir := $(root_dir)/build
 GOPATH := ${HOME}/go
 
+all: clean release
+
 
 clean:
 	rm -fr $(build_dir)
