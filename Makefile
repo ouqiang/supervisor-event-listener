@@ -1,35 +1,33 @@
-project_name:=supervisor-event-listener
-project_version:=1.2.2
+project_name:=supervisor-eventlistener
+project_version:=1.2.3
 root_dir := $(abspath $(CURDIR))
 build_dir := $(root_dir)/build
 GOPATH := ${HOME}/go
 
 
-.PHONY: clean
 clean:
 	rm -fr $(build_dir)
 
-.PHONY: build-bydocker
+
 build-bydocker:
 	sudo docker run -it --rm \
 		-v $(GOPATH)/:/root/go/ \
 		-v $(root_dir)/:/$(project_name) \
 		-w /$(project_name)/ \
-		golang:1.16.2-buster \
+		golang:1.17.0-buster \
 		make build
 
 
-.PHONY: build
 build:
-	GO111MODULE=on go build -o $(project_name) ./$(project_name).go
+	GO111MODULE=on go build -o $(project_name) ./main.go
 
 
-.PHONY: release
 release: clean build-bydocker
-	mkdir -p                            $(build_dir)/$(project_name)/
-	mv ./supervisor-event-listener      $(build_dir)/$(project_name)/
-	cp ./supervisor-event-listener.toml $(build_dir)/$(project_name)/
+	mkdir -p                       $(build_dir)/$(project_name)/
+	mv ./supervisor-eventlistener  $(build_dir)/$(project_name)/
+	cp ./conf/config.toml          $(build_dir)/$(project_name)/
 	cd $(build_dir) && tar -zcvf $(project_name)-$(project_version).tar.gz $(project_name)
+	@echo ...created $(build_dir)/$(project_name)-$(project_version).tar.gz
 	@echo ...done.
 
 
@@ -38,8 +36,8 @@ log:
 	tmux split-window -t "dev:0"
 	tmux split-window -t "dev:0.0" -h
 	tmux split-window -t "dev:0.2" -h
-	tmux send-keys -t "dev:0.0" "bash -c 'tail -f /tmp/supervisor-event-listener.log'" Enter
-	tmux send-keys -t "dev:0.1" "bash -c 'sudo supervisorctl tail -f supervisor-event-listener'" Enter
+	tmux send-keys -t "dev:0.0" "bash -c 'tail -f /tmp/supervisor-eventlistener.log'" Enter
+	tmux send-keys -t "dev:0.1" "bash -c 'sudo supervisorctl tail -f $(project_name)'" Enter
 	tmux set-option -g mouse on
 	tmux attach -t dev
 	tmux kill-session -t dev
@@ -47,10 +45,12 @@ log:
 
 test-integration:
 	go build 
-	sudo supervisorctl stop supervisor-event-listener
-	sudo cp ./supervisor-event-listener /usr/local/bin/
+	sudo supervisorctl stop $(project_name)
+	sudo cp ./$(project_name) /usr/local/bin/
 	sudo cp ./tests/supervisor-app.ini /etc/supervisor.d/
-	sudo supervisorctl remove supervisor-event-listener
-	sudo supervisorctl update supervisor-event-listener
-	sudo supervisorctl tail -f supervisor-event-listener stderr
+	sudo supervisorctl remove $(project_name)
+	sudo supervisorctl update $(project_name)
+	sudo supervisorctl tail -f $(project_name) stderr
 
+
+.PHONY: clean build build-bydocker release log test-integration
