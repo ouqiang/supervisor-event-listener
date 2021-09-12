@@ -1,4 +1,5 @@
 # Binaries for programs and plugins
+supervisor-eventlistener
 *.exe
 *.dll
 *.so
@@ -11,5 +12,7 @@
 *.out
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-.glide/
-.idear
+.*/
+vendor/**/*.yml
+vendor/**/.gitignore
+build/
